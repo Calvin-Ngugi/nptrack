@@ -649,7 +649,7 @@ public class UserAuth extends AbstractVerticle {
             return;
         }
 
-        JsonObject response = new UserUtil().fetchRolePermissions("rp.[role_id]",role_id);
+        JsonObject response = new UserUtil().fetchRolePermissions("rp.RoleId",role_id);
         if (response.getJsonArray("data").size() > 0 ) {
             response
                     .put("responseCode", "000")

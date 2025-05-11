@@ -9,8 +9,10 @@ import com.tracking.adaptors.EmailAdaptor;
 import com.tracking.adaptors.Integrator;
 import com.tracking.adaptors.SMSAdaptor;
 import com.tracking.adaptors.Validation;
+import com.tracking.alerts.AlertsAdaptor;
 import com.tracking.user.UserAuth;
 import com.tracking.util.Prop;
+import com.tracking.vehicles.VehiclesAdaptor;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -129,6 +131,8 @@ public class EntryPoint extends AbstractVerticle {
         vertx.deployVerticle(UserAuth.class.getName(), options);
         vertx.deployVerticle(EmailAdaptor.class.getName(), options);
         vertx.deployVerticle(ActivityLogVerticle.class.getName(), options);
+        vertx.deployVerticle(VehiclesAdaptor.class.getName(), options);
+        vertx.deployVerticle(AlertsAdaptor.class.getName(), options);
     }
 
     @Override
@@ -173,8 +177,6 @@ public class EntryPoint extends AbstractVerticle {
                 }
                 if ("POST".equalsIgnoreCase(method)) {
                     JsonObject data = new JsonObject(body);
-                    data.put("ip_address", ip);
-
                     logger.applicationLog(logger.logPreString() + "Channel Request  - " + data + "\n\n", "", 2);
                     if (path.endsWith("/nptrack/req")) {
                         try {

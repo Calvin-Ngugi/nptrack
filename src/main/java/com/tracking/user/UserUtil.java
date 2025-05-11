@@ -900,6 +900,7 @@ public class UserUtil {
             String role = userDetails.getString("Role");
             String roleName = userDetails.getString("RoleName");
             String phoneNumber = userDetails.getString("PhoneNumber");
+            String email = userDetails.getString("Email");
 
 //            JsonArray userBranches = userDetails.getJsonArray("userBranchesDetails");
 
@@ -908,6 +909,7 @@ public class UserUtil {
                     .put("changePassword", lv_changePassword)
                     .put("name", name)
                     .put("phoneNumber", phoneNumber)
+                    .put("email", email)
                     .put("rolePermission", fetchRolePermissionsArray("r.[Id]", role));
 //                    .put("userBranches", userBranches);
         } else {
@@ -1175,11 +1177,11 @@ public class UserUtil {
 
     public JsonObject fetchUserPermissions(String searchColumn, String searchWord) {
         JsonObject res = new JsonObject();
-        String sql = "SELECT TOP (1000) u.[id],r.id AS role_id,p.[name] AS p_name,first_name,last_name,phone_number,[email],[status]\n"
-                + "  FROM [dbo].[users] u\n"
-                + "  LEFT JOIN roles r ON r.[name] = u.[type]\n"
-                + "  JOIN [role_has_permissions] rp ON rp.role_id = r.id\n"
-                + "  LEFT JOIN [permissions] p ON p.[id] = rp.permission_id\n"
+        String sql = "SELECT TOP (1000) u.[Id],r.Id AS role_id,p.[Name] AS p_name,FirstName,LastName,PhoneNumber,Email,Status\n"
+                + "  FROM [dbo].[Users] u\n"
+                + "  LEFT JOIN roles r ON r.[Name] = u.[Role]\n"
+                + "  JOIN [RoleHasPermissions] rp ON rp.RoleId = r.Id\n"
+                + "  LEFT JOIN [Permissions] p ON p.[Id] = rp.PermissionId\n"
                 + "  WHERE " + searchColumn + " = ? ";
 
         DBConnection dbConnection = new DBConnection();
@@ -1196,13 +1198,13 @@ public class UserUtil {
                 JsonObject obj = new JsonObject();
                 res
                         .put("successIndicator", true)
-                        .put("firstName", resultSet.getString("first_name"))
-                        .put("lastName", resultSet.getString("last_name"))
-                        .put("phoneNumber", resultSet.getString("phone_number"))
-                        .put("email", resultSet.getString("email"))
-                        .put("type", resultSet.getString("type"))
-                        .put("permissionName", resultSet.getString("p_name"))
-                        .put("status", resultSet.getString("status"));
+                        .put("FirstName", resultSet.getString("FirstName"))
+                        .put("LastName", resultSet.getString("LastName"))
+                        .put("PhoneNumber", resultSet.getString("PhoneNumber"))
+                        .put("Email", resultSet.getString("Email"))
+                        .put("Type", resultSet.getString("Role"))
+                        .put("PermissionName", resultSet.getString("p_name"))
+                        .put("Status", resultSet.getString("Status"));
                 array.add(obj);
             } else {
                 res.put("successIndicator", false);
@@ -1228,12 +1230,12 @@ public class UserUtil {
 
     public boolean checkUserHasPermission(String searchColumn, String searchWord, String permission) {
         boolean hasPermission = false;
-        String sql = "SELECT TOP (100) u.[id],r.id AS role_id,p.[name] AS p_name,first_name,last_name,phone_number,[email],[status]\n"
-                + "  FROM [dbo].[users] u\n"
-                + "  LEFT JOIN roles r ON r.[id] = u.[type]\n"
-                + "  JOIN [role_has_permissions] rp ON rp.role_id = r.id\n"
-                + "  LEFT JOIN [permissions] p ON p.[id] = rp.permission_id\n"
-                + "  WHERE " + searchColumn + " = ? AND p.[name] = ? ";
+        String sql = "SELECT TOP (100) u.[Id],r.Id AS role_id,p.[Name] AS p_name,FirstName,LastName,PhoneNumber,Email,Status\n"
+                + "  FROM [dbo].[Users] u\n"
+                + "  LEFT JOIN Roles r ON r.[Id] = u.[Role]\n"
+                + "  JOIN [RoleHasPermissions] rp ON rp.RoleId = r.Id\n"
+                + "  LEFT JOIN [Permissions] p ON p.[Id] = rp.PermissionId\n"
+                + "  WHERE " + searchColumn + " = ? AND p.[Name] = ? ";
 
         DBConnection dbConnection = new DBConnection();
         Connection connection = dbConnection.getConnection();
@@ -1305,7 +1307,7 @@ public class UserUtil {
 
     public JsonObject fetchRoleDetails(String searchColumn, String searchWord) {
         JsonObject res = new JsonObject();
-        String sql = "SELECT id,Name,CreatedAt,UpdatedAt FROM Roles "
+        String sql = "SELECT Id,Name,CreatedAt,UpdatedAt FROM Roles "
                 + "  WHERE " + searchColumn + " = ? ";
 
         DBConnection dbConnection = new DBConnection();
@@ -1350,7 +1352,7 @@ public class UserUtil {
 
     public JsonObject fetchRoles() {
         JsonObject res = new JsonObject();
-        String sql = "SELECT id,[name],[description],created_at,updated_at FROM roles ";
+        String sql = "SELECT * FROM Roles ";
 
         DBConnection dbConnection = new DBConnection();
         Connection connection = dbConnection.getConnection();
@@ -1364,11 +1366,10 @@ public class UserUtil {
             while (resultSet.next()) {
                 JsonObject obj = new JsonObject();
                 obj
-                        .put("id", resultSet.getString("id"))
-                        .put("role_name", resultSet.getString("name"))
-                        .put("description", resultSet.getString("description"))
-                        .put("created_at", resultSet.getString("created_at"))
-                        .put("updated_at", resultSet.getString("updated_at"));
+                        .put("Id", resultSet.getString("Id"))
+                        .put("RoleName", resultSet.getString("Name"))
+                        .put("CreatedAt", resultSet.getString("CreatedAt"))
+                        .put("UpdatedAt", resultSet.getString("UpdatedAt"));
                 array.add(obj);
             }
 
@@ -1391,7 +1392,7 @@ public class UserUtil {
 
     public JsonObject fetchPermissions() {
         JsonObject res = new JsonObject();
-        String sql = "SELECT [id],[name],[description],[created_at],[updated_at] FROM permissions ";
+        String sql = "SELECT [Id],[Name],[CreatedAt],[UpdatedAt] FROM Permissions ";
 
         DBConnection dbConnection = new DBConnection();
         Connection connection = dbConnection.getConnection();
@@ -1405,11 +1406,10 @@ public class UserUtil {
             while (resultSet.next()) {
                 JsonObject obj = new JsonObject();
                 obj
-                        .put("id", resultSet.getString("id"))
-                        .put("role_name", resultSet.getString("name"))
-                        .put("description", resultSet.getString("description"))
-                        .put("created_at", resultSet.getString("created_at"))
-                        .put("updated_at", resultSet.getString("updated_at"));
+                        .put("Id", resultSet.getString("Id"))
+                        .put("PermissionName", resultSet.getString("Name"))
+                        .put("CreatedAt", resultSet.getString("CreatedAt"))
+                        .put("UpdatedAt", resultSet.getString("UpdatedAt"));
                 array.add(obj);
             }
 
@@ -1495,16 +1495,16 @@ public class UserUtil {
             while (resultSet.next()) {
                 JsonObject obj = new JsonObject();
                 obj
-                        .put("role_id", resultSet.getString("role_id"))
-                        .put("role_name", resultSet.getString("name"))
+                        .put("roleId", resultSet.getString("RoleId"))
+                        .put("roleName", resultSet.getString("Name"))
 //                        .put("role_description", resultSet.getString("description"))
-                        .put("role_created_at", resultSet.getString("CreatedAt"))
-                        .put("role_updated_at", resultSet.getString("UpdatedAt"))
-                        .put("permission_id", resultSet.getString("PermissionId"))
-                        .put("permission_name", resultSet.getString("p_name"))
+                        .put("roleCreatedAt", resultSet.getString("CreatedAt"))
+                        .put("roleUpdatedAt", resultSet.getString("UpdatedAt"))
+                        .put("permissionId", resultSet.getString("PermissionId"))
+                        .put("permissionName", resultSet.getString("p_name"))
 //                        .put("permission_description", resultSet.getString("p_description"))
-                        .put("permission_created_at", resultSet.getString("p_created_at"))
-                        .put("permission_updated_at", resultSet.getString("p_updated_at"));
+                        .put("permissionCreatedAt", resultSet.getString("p_created_at"))
+                        .put("permissionUpdatedAt", resultSet.getString("p_updated_at"));
                 array.add(obj);
             }
 
@@ -1527,13 +1527,12 @@ public class UserUtil {
 
     public JsonObject addRolePermissions(JsonObject data) {
         JsonObject res = new JsonObject();
-        String name = data.getString("role_name");
-        String description = data.getString("role_description");
-        JsonArray permissions = data.getJsonArray("permissions");
+        String name = data.getString("Name");
+        JsonArray permissions = data.getJsonArray("Permissions");
         String actionBy = data.getString("user");
 
-        String insertRoles = "INSERT INTO roles([name],[description],[creator_id]) VALUES(?,?,?)";
-        String insertRolePermission = "INSERT INTO [dbo].[role_has_permissions]([permission_id],[role_id],[creator_id])  VALUES(?,?,?)";
+        String insertRoles = "INSERT INTO roles(Name) VALUES(?)";
+        String insertRolePermission = "INSERT INTO RoleHasPermissions(PermissionId,RoleId) VALUES(?,?)";
 
         DBConnection dbConnection = new DBConnection();
         Connection connection = dbConnection.getConnection();
@@ -1543,8 +1542,6 @@ public class UserUtil {
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertRoles, PreparedStatement.RETURN_GENERATED_KEYS);
                 PreparedStatement preparedStatement1 = connection.prepareStatement(insertRolePermission)) {
             preparedStatement.setString(1, name);
-            preparedStatement.setString(2, description);
-            preparedStatement.setString(3, actionBy);
             preparedStatement.executeUpdate();
 
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
@@ -1553,7 +1550,6 @@ public class UserUtil {
                 for (byte x = 0; x < permissions.size(); x++) {
                     preparedStatement1.setInt(1, Integer.parseInt(permissions.getString(x)));
                     preparedStatement1.setInt(2, role_id);
-                    preparedStatement1.setString(3, actionBy);
                     preparedStatement1.addBatch();
                 }
                 int[] insertedRows = preparedStatement1.executeBatch();
@@ -1586,11 +1582,10 @@ public class UserUtil {
 
     public JsonObject updateRolePermissions(JsonObject data) {
         JsonObject res = new JsonObject();
-        String roleId = data.getString("role_id");
+        String roleId = data.getString("roleId");
         JsonArray permissions = data.getJsonArray("permissions");
-        String actionBy = "2";
 
-        JsonObject roleDetails = fetchRoleDetails("[id]", roleId);
+        JsonObject roleDetails = fetchRoleDetails("[Id]", roleId);
         //System.out.println(roleDetails);
         if (!roleDetails.getBoolean("successIndicator")) {
             res
@@ -1598,11 +1593,11 @@ public class UserUtil {
                     .put("responseDescription", "Error! Unable to fetch role details");
             return res;
         }
-        int role_id = Integer.parseInt(roleDetails.getString("id"));
+        int role_id = Integer.parseInt(roleDetails.getString("Id"));
 
 //        String insertRoles = "INSERT INTO roles([name],[description],[creator_id]) VALUES(?,?,?)";
-        String deleteRolesPermissions = "DELETE FROM role_has_permissions WHERE role_id = ?";
-        String insertRolePermission = "INSERT INTO [dbo].[role_has_permissions]([permission_id],[role_id],[creator_id])  VALUES(?,?,?)";
+        String deleteRolesPermissions = "DELETE FROM RoleHasPermissions WHERE RoleId = ?";
+        String insertRolePermission = "INSERT INTO RoleHasPermissions(PermissionId,RoleId)  VALUES(?,?)";
 
         DBConnection dbConnection = new DBConnection();
         Connection connection = dbConnection.getConnection();
@@ -1616,7 +1611,6 @@ public class UserUtil {
             for (byte x = 0; x < permissions.size(); x++) {
                 preparedStatement1.setInt(1, permissions.getInteger(x));
                 preparedStatement1.setInt(2, role_id);
-                preparedStatement1.setString(3, actionBy);
                 preparedStatement1.addBatch();
             }
             int[] insertedRows = preparedStatement1.executeBatch();
